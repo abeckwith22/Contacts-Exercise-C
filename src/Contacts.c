@@ -9,25 +9,25 @@ int test(void) {
     int contacts_size = 100;
     Contact contacts[contacts_size] = {};
 
-    Contact firstContact = {
+    Contact first_contact = {
         .name="Sprinky Jims Junior",
         .phone="512-789-0254",
         .email="FloridaMan@email.com",
     };
-    Contact secondContact = {
+    Contact second_contact = {
         .name="Jeremy P. Butler",
         .phone="512-789-0255",
         .email="JeremyBut(t)ler@email.com",
     };
-    Contact thirdContact = {
+    Contact third_contact = {
         .name="Satan",
         .phone="666-666-6666",
         .email="ElDiablo@email.com",
     };
 
-    contacts[0] = firstContact;
-    contacts[1] = secondContact;
-    contacts[2] = thirdContact;
+    contacts[0] = first_contact;
+    contacts[1] = second_contact;
+    contacts[2] = third_contact;
 
     Contact *cptr = contacts;
 
@@ -54,55 +54,6 @@ int test(void) {
 }
 
 int run(void) {
-    int done = FALSE;
-    char string[MAX_LENGTH] = {};
-    char name[50] = {};
-    char phone[20] = {};
-    char email[50] = {};
-
-    int contacts_length = 100;
-    Contact contacts[contacts_length] = {};
-    int contacts_size = sizeof(contacts) / sizeof(contacts[0]);
-
-    Contact firstContact = {
-        .name="Sprinky Jims Junior",
-        .phone="512-789-0254",
-        .email="FloridaMan@email.com",
-    };
-    Contact secondContact = {
-        .name="Jeremy P. Butler",
-        .phone="512-789-0255",
-        .email="JeremyBut(t)ler@email.com",
-    };
-    Contact thirdContact = {
-        .name="Satan",
-        .phone="666-666-6666",
-        .email="ElDiablo@email.com",
-    };
-
-    contacts[0] = firstContact;
-    contacts[1] = secondContact;
-    contacts[2] = thirdContact;
-
-    int num_contacts = 0;
-
-    printf("Enter new contact!\n");
-    printf("Enter Name : ");
-    int c_name  = get_input(name, 50);
-    printf("Enter Phone: ");
-    int c_phone = get_input(phone, 20);
-    printf("Enter Email: ");
-    int c_email = get_input(email, 50);
-
-    printf("Name  : %s", name);
-    printf("Phone : %s", phone);
-    printf("Email : %s", email);
-
-    // Now add a contact
-    // add_contact(contacts, contacts_size, name, phone, email);
-
-    // Now list all contacts
-    // list_contacts(*contacts, contacts_size);
     return 0;
 }
 
