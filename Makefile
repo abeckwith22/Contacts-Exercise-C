@@ -1,7 +1,7 @@
 CXX=clang
 CXXFLAGS=
 
-SRC=src/app.c src/Contacts.c
+SRC=src/main.c src/Contacts.c
 OBJ=$(SRC:.c=.o)
 
 TARGET=target.out

@@ -1,13 +1,26 @@
 #include "Contacts.h"
+#include <string.h>
+#include <stdlib.h>
+
+// ====================
+// TODO
+// ====================
+// - [ ] Add a tui with the following features, all of which should be accessible through the program
+//      - [ ] User can go through a series of options to list contacts
+//      - [ ] Get a specific contact
+//      - [ ] Add a contact
+// - [ ] Security
+//      - [ ] Shouldn't allow user to input duplicate email.
+//      - [ ] When adding contact, values (i.e. name, phone, email) should not be empty and should also be valid.
+// - [ ] Features
+//      - [ ] Test for edge cases
+//
 
 int test(void) {
     char string[MAX_LENGTH] = {};
-    char name[50] = {};
-    char phone[20] = {};
-    char email[50] = {};
-
-    int contacts_size = 100;
-    Contact contacts[contacts_size] = {};
+    char name[50] = "First Last";
+    char phone[20] = "123-456-7890";
+    char email[50] = "firstlast@email.com";
 
     Contact first_contact = {
         .name="Sprinky Jims Junior",
@@ -23,40 +36,74 @@ int test(void) {
         .name="Satan",
         .phone="666-666-6666",
         .email="ElDiablo@email.com",
+        .next=NULL
+    };
+    Contact fourth_contact = {
+        .name="Testing",
+        .phone="123-456-7890",
+        .email="firstlast@email.com",
+        .next=NULL
     };
 
-    contacts[0] = first_contact;
-    contacts[1] = second_contact;
-    contacts[2] = third_contact;
+    Contact* head = &first_contact;
 
-    Contact *cptr = contacts;
+    first_contact.next = &second_contact;
+    second_contact.next = &third_contact;
 
-    int num_contacts = 0;
+    // Before allocation of new contact
+    printf("------------------------ BEFORE ALLOCATION ------------------------\n");
+    list_contacts(head);
 
-    // Add new contact
-    printf("Enter new contact!\n");
-    printf("Enter Name : ");
-    int c_name  = get_input(name, 50);
-    printf("Enter Phone: ");
-    int c_phone = get_input(phone, 20);
-    printf("Enter Email: ");
-    int c_email = get_input(email, 50);
+    // After allocation of new contact
+    printf("------------------------ AFTER  ADD   USER ------------------------\n");
+    add_contact(&head, name, phone, email);
+    list_contacts(&first_contact);
     
-    printf("Name  : %s\n", name);
-    printf("Phone : %s\n", phone);
-    printf("Email : %s\n", email);
-    add_contact(contacts, contacts_size, name, phone, email);
-    list_contacts(contacts, contacts_size);
-
-
-    printf("^ Contacts listed! ^\n");
+    printf("------------------------ AFTER DELETE USER ------------------------\n");
+    delete_contact(&head, "firstlast@email.com");
+    list_contacts(&first_contact);
     return 0;
+}
+
+void list_contacts(Contact *head) {
+    Contact *current=head;
+    for(int i=0; current != NULL; i++, current=current->next) {
+        printf("================= Contact #%d: =================\n", i);
+        printf("Name  : %s\n", current->name);
+        printf("Phone : %s\n", current->phone);
+        printf("Email : %s\n", current->email);
+    }
+    return;
+}
+
+void get_contact_info(Contact *contact) {
+    printf("================= Contact =================\n");
+    printf("Name  : %s\n", contact->name);
+    printf("Phone : %s\n", contact->phone);
+    printf("Email : %s\n", contact->email);
+    printf("===========================================\n");
+
+    return;
+}
+
+Contact* get_tail(Contact *head) {
+    if(head==NULL) return head;
+    
+    Contact *current;
+    // Traverses list until the next value is null indicating the tail.
+    for(current=head; current->next != NULL; current=current->next); 
+    return current;
 }
 
 int run(void) {
     return 0;
 }
 
+int tui(void) {
+    return 0;
+} 
+
+// TODO: Could I just dumb this down to an scanf?
 int get_input(char* result, int result_size) {
     char c;
     int i;
@@ -68,75 +115,93 @@ int get_input(char* result, int result_size) {
     return i;
 }
 
-int is_contact_empty(Contact contacts[], int index) {
-    Contact *contact = &contacts[index];
-    return (
-        strcmp(contact->name, "")  == 0 &&
-        strcmp(contact->phone, "") == 0 &&
-        strcmp(contact->email, "") == 0
-    );
-}
-
-void list_contacts(Contact contacts[], int contacts_size) {
-    for(int i = 0; i < contacts_size && !is_contact_empty(contacts, i); i++) {
-        Contact *p_contact = &contacts[i];
-        printf("==========\n");
-        printf("Contact #%d\n", i);
-        printf("Name  : %s\n", p_contact->name);
-        printf("Phone : %s\n", p_contact->phone);
-        printf("Email : %s\n", p_contact->email);
+int is_duplicate_email(Contact **head, const char* email) {
+    for(Contact *current=*head; current!=NULL; current=current->next) {
+        if(strcmp(current->email, email) == 0) {
+            return TRUE;
+        }
     }
-    return;
+    return FALSE;
 }
 
-Contact get_contact(Contact contacts[], int contacts_size, int index) {
-    Contact empty_contact = {
-        .name="",
-        .phone="",
-        .email=""
-    };
-
-    if(index < 0 || index >= contacts_size) 
-        return empty_contact;
-    return contacts[index];
+// Needs a unique ID to be able to search properly
+Contact get_contact(Contact *head, const char *email) {
+    return *head;
 }
 
-void add_contact(Contact contacts[], int contacts_size, char* name, char* phone, char* email) {
-    // Create new contact
-    Contact new_contact;
+void add_contact(Contact **head, const char *name, const char *phone, const char *email) {
 
-    strncpy(new_contact.name, name, sizeof(new_contact.name) - 1);
-    new_contact.name[sizeof(new_contact.name) - 1] = '\0'; 
-    strncpy(new_contact.phone, phone, sizeof(new_contact.phone) - 1);
-    new_contact.phone[sizeof(new_contact.phone) - 1] = '\0'; 
-    strncpy(new_contact.email, email, sizeof(new_contact.email) - 1);
-    new_contact.email[sizeof(new_contact.email) - 1] = '\0'; 
+    // Allocate memory for new contact
+    Contact *new_contact = (Contact *) malloc(sizeof(Contact));
 
-    int i;
-    // Iterate through list until empty space is detected. Found by checking if all struct members are empty.
-    for(i = 0; i < contacts_size && !is_contact_empty(contacts, i); i++);
-
-    printf("Contact_list empty @ i: %d\n", i);
-
-    // if no space, throw error and return
-    if(i+1==contacts_size) {
-        printf("ERROR: Array of contacts is full.");
-        return;
-    }
-    contacts[i] = new_contact;
-    return;
-}
-
-void delete_contact(Contact contacts[], int contacts_size, int index) {
-    if(index < 0 || index > contacts_size) {
-        printf("Invalid index. Index out-of-bounds.");
+    if(new_contact == NULL) {
+        printf("function add_contact(): Failed to allocated memory\n");
         return;
     }
 
-    Contact empty_contact = {
-        .name="",
-        .phone="",
-        .email=""
-    };
-    contacts[index] = empty_contact;
+    if(is_duplicate_email(head, email)) {
+        printf("function add_contact(): Email address already exists, exiting.");
+        return;
+    }
+
+    // Set values for new_contact with string copy and adding a terminating value at the end.
+    strncpy(new_contact->name, name, sizeof(new_contact->name) - 1);
+    new_contact->name[sizeof(new_contact->name) - 1] = '\0';
+
+    strncpy(new_contact->phone, phone, sizeof(new_contact->phone) - 1);
+    new_contact->phone[sizeof(new_contact->phone) - 1] = '\0';
+
+    strncpy(new_contact->email, email, sizeof(new_contact->email) - 1);
+    new_contact->email[sizeof(new_contact->email) - 1] = '\0';
+
+    // append to end of linked list
+    if(*head == NULL) {
+        *head = new_contact;
+    } else {
+        Contact *tail = *head;
+        while (tail->next != NULL) {
+            tail = tail->next;
+        }
+        tail->next = new_contact;
+    }
+
+    return;
+}
+
+// Need to traverse the array to find the contact before the contact to delete
+// I'll also need the contact after the contact to delete
+// so I can set src->next=target
+// Need a unique value so I don't get wrong node
+// Then free the target
+void delete_contact(Contact** head, const char* email) {
+    if(head==NULL || *head == NULL) {
+        printf("function delete_contact(): Empty list\n");
+        return;
+    }
+
+    Contact* current=*head;
+
+    // head needs to be deleted
+    if(strcmp(current->email,email) == 0) {
+        *head = current->next;
+        free(current);
+        printf("function delete_contact(): Contact successfully deleted\n");
+        return;
+    }
+
+    for(;current->next != NULL; current=current->next) {
+        // if the next node in list is the desired one save the current one as temp
+        if(strcmp(current->next->email, email) == 0) {
+            Contact* node_to_delete = current->next;
+
+            current->next=node_to_delete->next;
+
+            // then we free node_to_delete
+            free(node_to_delete);
+            printf("function delete_contact(): Contact successfully deleted\n");
+            return;
+        }
+    }
+    printf("function delete_contact(): Email not found\n");
+    return;
 }
