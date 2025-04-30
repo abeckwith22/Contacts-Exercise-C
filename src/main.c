@@ -1,4 +1,4 @@
-#include "Contacts.h"
+#include "../include/Contacts.h"
 
 int main(void) {
     test();

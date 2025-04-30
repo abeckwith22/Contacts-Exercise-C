@@ -1,4 +1,4 @@
-#include "Contacts.h"
+#include "../include/Contacts.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -57,10 +57,12 @@ int test(void) {
     // After allocation of new contact
     printf("------------------------ AFTER  ADD   USER ------------------------\n");
     add_contact(&head, name, phone, email);
+    add_contact(&head, "New Test", "102-120-2120", "emailemail@email.com");
     list_contacts(&first_contact);
     
     printf("------------------------ AFTER DELETE USER ------------------------\n");
     delete_contact(&head, "firstlast@email.com");
+    delete_contact(&head, "emailemail@email.com");
     list_contacts(&first_contact);
     return 0;
 }
@@ -77,6 +79,10 @@ void list_contacts(Contact *head) {
 }
 
 void get_contact_info(Contact *contact) {
+
+    if(!contact) {
+        printf("function get_contact_info: contact does not exist.\n");
+    }
     printf("================= Contact =================\n");
     printf("Name  : %s\n", contact->name);
     printf("Phone : %s\n", contact->phone);
@@ -116,15 +122,12 @@ int get_input(char* result, int result_size) {
 }
 
 int is_duplicate_email(Contact **head, const char* email) {
-    for(Contact *current=*head; current!=NULL; current=current->next) {
-        if(strcmp(current->email, email) == 0) {
+    for(Contact *current=*head; current!=NULL; current=current->next) 
+        if(strcmp(current->email, email) == 0)  
             return TRUE;
-        }
-    }
     return FALSE;
 }
 
-// Needs a unique ID to be able to search properly
 Contact get_contact(Contact *head, const char *email) {
     return *head;
 }
@@ -140,7 +143,8 @@ void add_contact(Contact **head, const char *name, const char *phone, const char
     }
 
     if(is_duplicate_email(head, email)) {
-        printf("function add_contact(): Email address already exists, exiting.");
+        printf("function add_contact(): Email address already exists, exiting.\n");
+        free(new_contact);
         return;
     }
 
@@ -153,6 +157,8 @@ void add_contact(Contact **head, const char *name, const char *phone, const char
 
     strncpy(new_contact->email, email, sizeof(new_contact->email) - 1);
     new_contact->email[sizeof(new_contact->email) - 1] = '\0';
+
+    new_contact->next = NULL;
 
     // append to end of linked list
     if(*head == NULL) {
@@ -173,35 +179,39 @@ void add_contact(Contact **head, const char *name, const char *phone, const char
 // so I can set src->next=target
 // Need a unique value so I don't get wrong node
 // Then free the target
-void delete_contact(Contact** head, const char* email) {
+int delete_contact(Contact** head, const char* email) {
     if(head==NULL || *head == NULL) {
         printf("function delete_contact(): Empty list\n");
-        return;
+        return -1;
     }
 
     Contact* current=*head;
+    // printf("function delete_contact debugging;(contact name) -> %s\n", current->name);
 
     // head needs to be deleted
     if(strcmp(current->email,email) == 0) {
         *head = current->next;
+        // free(current->name);
+        // free(current->phone);
+        // free(current->email);
         free(current);
         printf("function delete_contact(): Contact successfully deleted\n");
-        return;
+        return 0;
     }
 
     for(;current->next != NULL; current=current->next) {
+        // printf("function delete_contact debugging;(contact name) -> %s\n", current->name);
         // if the next node in list is the desired one save the current one as temp
         if(strcmp(current->next->email, email) == 0) {
             Contact* node_to_delete = current->next;
+            // set n-1 node to the next node in the list.
+            current->next = node_to_delete->next;
 
-            current->next=node_to_delete->next;
-
-            // then we free node_to_delete
             free(node_to_delete);
-            printf("function delete_contact(): Contact successfully deleted\n");
-            return;
+            // printf("function delete_contact(): Contact successfully deleted\n");
+            return 0;
         }
     }
-    printf("function delete_contact(): Email not found\n");
-    return;
+    // printf("function delete_contact(): Email not found\n");
+    return -1;
 }

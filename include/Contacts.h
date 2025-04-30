@@ -35,7 +35,7 @@
     void get_contact_info(Contact *contact);
 
     // Deletes contact from contact list, needs an index.
-    void delete_contact(Contact** head, const char* email);
+    int delete_contact(Contact** head, const char* email);
 
     // Traverse all contacts in contacts list.
     void list_contacts(Contact* head);
